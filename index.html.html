@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calendario de Adviento · María Desatanudos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#0b1d4a; --night-2:#132a5c; --gold:#c9a55a; --gold-soft:#e2c27a;
+  --cream:#f4ecd8; --paper:#fbf7ee; --ink:#13244f; --ink-soft:#3a5288; --muted:rgba(244,236,216,.62);
+  --serif:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --caps:"Cinzel", "Trajan Pro", Georgia, serif;
+  --script:"Great Vibes", "Brush Script MT", cursive;
+  color-scheme: dark;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+html{ scroll-padding-top:env(safe-area-inset-top,0px); background:var(--night); }
+*,*::before,*::after{ box-sizing:inherit; }
+body{
+  margin:0; min-height:100%; background:
+    radial-gradient(120% 60% at 50% 0%, #1d3a78 0%, rgba(29,58,120,0) 60%),
+    var(--night);
+  color:var(--cream); font-family:var(--serif); font-size:19px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.sky{ position:fixed; inset:0; pointer-events:none; z-index:0; }
+.wrap{ position:relative; z-index:1; max-width:860px; margin:0 auto; padding:40px 20px 56px; }
+header{ text-align:center; }
+.kicker{ font-family:var(--caps); font-size:12px; letter-spacing:.32em; color:var(--gold-soft); margin:0 0 14px; }
+h1{ font-family:var(--caps); font-weight:600; font-size:clamp(34px,7vw,54px); line-height:1.05; margin:0; color:var(--cream); letter-spacing:.02em; }
+h1 small{ display:block; font-family:var(--serif); font-style:italic; font-weight:500; font-size:.48em; color:var(--gold-soft); letter-spacing:0; margin-top:6px; }
+.intro{ max-width:34em; margin:18px auto 0; color:var(--muted); font-size:18px; }
+.status{ display:flex; justify-content:center; align-items:center; gap:14px; margin:26px auto 4px; flex-wrap:wrap; }
+.count{ font-family:var(--caps); font-size:14px; letter-spacing:.12em; color:var(--gold-soft); }
+.bar{ width:180px; height:6px; border-radius:6px; background:rgba(201,165,90,.2); overflow:hidden; }
+.bar i{ display:block; height:100%; width:0; background:linear-gradient(90deg,var(--gold),var(--gold-soft)); transition:width .6s ease; }
+.mode{ text-align:center; font-style:italic; color:var(--muted); font-size:16px; margin:6px 0 0; }
+.linkbtn{ background:none; border:1px solid rgba(201,165,90,.55); color:var(--gold-soft); font-family:var(--serif); font-size:17px; padding:7px 18px; border-radius:30px; cursor:pointer; margin-top:16px; }
+.linkbtn:hover{ background:rgba(201,165,90,.1); }
+
+/* ribbon */
+.ribbon{ position:relative; margin:30px auto 10px; }
+.ribbon svg.path{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+.knots{ position:relative; display:grid; grid-template-columns:repeat(var(--cols),1fr); row-gap:var(--rowgap); }
+.knot{ position:relative; justify-self:center; width:64px; height:64px; border-radius:50%; border:0; padding:0; cursor:pointer; background:none; color:var(--ink); font-family:var(--caps); }
+.knot svg{ width:100%; height:100%; display:block; overflow:visible; }
+.knot .num{ position:absolute; inset:0; display:grid; place-items:center; font-size:17px; font-weight:600; color:var(--ink); pointer-events:none; }
+.knot .date{ position:absolute; left:50%; top:100%; transform:translateX(-50%); margin-top:5px; font-family:var(--serif); font-style:italic; font-size:14px; color:var(--muted); white-space:nowrap; }
+.knot.locked{ cursor:default; }
+.knot.locked .num{ color:rgba(244,236,216,.5); }
+.knot.done .num{ color:var(--night); }
+.knot.today .halo{ animation:breathe 2.6s ease-in-out infinite; transform-origin:center; }
+@keyframes breathe{ 0%,100%{opacity:.35; transform:scale(1)} 50%{opacity:.9; transform:scale(1.12)} }
+.knot:focus-visible{ outline:2px solid var(--gold-soft); outline-offset:4px; }
+.knot.untie svg .loop{ animation:untie .7s ease forwards; }
+@keyframes untie{ to{ stroke-dashoffset:120; opacity:0 } }
+
+footer{ text-align:center; margin-top:54px; }
+.sign{ font-family:var(--script); font-size:34px; color:var(--gold-soft); line-height:1; }
+.handle{ display:inline-block; margin-top:12px; padding:5px 18px; border:1px solid rgba(226,194,122,.7); border-radius:30px; font-weight:600; color:var(--gold-soft); font-size:17px; }
+.legal{ margin-top:14px; font-size:14px; font-style:italic; color:rgba(244,236,216,.45); }
+
+/* sheet */
+.veil{ position:fixed; inset:0; background:rgba(5,12,32,.72); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); z-index:20; display:none; align-items:flex-end; justify-content:center; }
+.veil.open{ display:flex; }
+@media (min-width:700px){ .veil{ align-items:center; } }
+.sheet{ position:relative; width:min(560px,100%); max-height:92vh; overflow:auto; background:var(--paper); color:var(--ink); border-radius:18px 18px 0 0; padding:30px 28px calc(28px + env(safe-area-inset-bottom,0px)); box-shadow:0 -10px 50px rgba(0,0,0,.4); animation:rise .35s ease; }
+@media (min-width:700px){ .sheet{ border-radius:16px; } }
+@keyframes rise{ from{ transform:translateY(30px); opacity:0 } }
+.sheet::before{ content:""; position:absolute; inset:9px; border:1px solid rgba(201,165,90,.55); border-radius:12px; pointer-events:none; }
+.close{ position:absolute; top:14px; right:16px; width:38px; height:38px; border-radius:50%; border:1px solid rgba(19,36,79,.2); background:var(--paper); color:var(--ink); font-size:22px; line-height:1; cursor:pointer; z-index:2; }
+.sheet .day{ font-family:var(--caps); font-size:12px; letter-spacing:.28em; color:#a8843f; text-align:center; margin:0; }
+.sheet h2{ font-family:var(--caps); font-weight:600; font-size:clamp(25px,5vw,31px); margin:8px 0 2px; text-align:center; line-height:1.15; }
+.sheet .ref{ text-align:center; font-style:italic; color:var(--ink-soft); margin:0 0 6px; }
+.orn{ display:block; margin:6px auto 14px; }
+.block{ margin:16px 0; }
+.block h3{ font-family:var(--caps); font-size:12.5px; letter-spacing:.2em; color:#a8843f; margin:0 0 4px; font-weight:600; }
+.block p{ margin:0; text-align:left; hyphens:auto; }
+.msg p{ font-style:italic; }
+.prayer{ background:#f3ead6; border:1px solid rgba(201,165,90,.6); border-radius:12px; padding:14px 18px; }
+.gesture{ display:flex; gap:12px; align-items:flex-start; }
+.check{ margin-top:10px; display:flex; align-items:center; gap:10px; font-size:18px; cursor:pointer; user-select:none; }
+.check input{ width:22px; height:22px; accent-color:#a8843f; }
+textarea{ width:100%; min-height:84px; margin-top:6px; padding:10px 12px; border:1px solid rgba(19,36,79,.22); border-radius:10px; background:#fff; color:var(--ink); font-family:var(--serif); font-size:18px; resize:vertical; }
+textarea:focus{ outline:2px solid #c9a55a; border-color:transparent; }
+.untie{ display:block; width:100%; margin-top:20px; padding:14px; border:0; border-radius:40px; background:var(--night); color:var(--gold-soft); font-family:var(--caps); font-size:15px; letter-spacing:.12em; cursor:pointer; }
+.untie[disabled]{ background:#c9a55a; color:var(--night); cursor:default; }
+.lockmsg{ text-align:center; padding:20px 4px 8px; }
+.lockmsg .big{ font-family:var(--script); font-size:40px; color:#a8843f; line-height:1.1; }
+
+@media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+<canvas class="sky" id="sky" aria-hidden="true"></canvas>
+<div class="wrap">
+  <header>
+    <p class="kicker">La Casa de la Oración</p>
+    <h1>Calendario de Adviento<small>con María Desatanudos</small></h1>
+    <p class="intro">Veinticuatro nudos, uno por cada día hasta Nochebuena. Toca el nudo del día, lee el mensaje de María, reza la oración y vive el gesto. Al terminar, desátalo.</p>
+    <div class="status"><span class="count" id="count">0 de 24 nudos desatados</span><span class="bar"><i id="bar"></i></span></div>
+    <p class="mode" id="mode"></p>
+    <button class="linkbtn" id="startPrayer">Oración para comenzar</button>
+  </header>
+
+  <section class="ribbon" id="ribbon" aria-label="Los 24 nudos del Adviento">
+    <svg class="path" id="pathSvg" aria-hidden="true"></svg>
+    <div class="knots" id="knots"></div>
+  </section>
+
+  <footer>
+    <div class="sign">by Anyoly Socorro</div>
+    <div class="handle">@lacasadelaoracion</div>
+    <p class="legal">© La Casa de la Oración. Material de uso personal.</p>
+  </footer>
+</div>
+
+<div class="veil" id="veil" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script>
+const DAYS = [
+ ["El nudo de la prisa","Sal 46,10","Hijo mío, hija mía, no corras hacia la Navidad. Jesús no llega con ruido: llega en silencio, como llegó a Belén. Detente conmigo un momento y deja que el Niño te encuentre.","Señor, enséñame a esperar sin angustia. Baja el ritmo de mi corazón, ordena mis pensamientos y hazme sentir tu presencia en medio de mis ocupaciones. Amén.","Apaga el celular cinco minutos y quédate en silencio frente a una vela o una imagen de María."],
+ ["El nudo del miedo","Is 41,10","Yo conozco ese miedo que te despierta en la noche. Tómate de mi mano: yo se la entrego a mi Hijo, y con él no hay oscuridad que pueda más que tu esperanza.","Dios mío, pongo en tus manos lo que más temo. Dame valor para dar el siguiente paso, aunque no vea el camino completo. Contigo no tengo nada que temer. Amén.","Escribe tu mayor miedo en un papelito, rézalo con un Padrenuestro y guárdalo bajo la imagen de la Virgen."],
+ ["El nudo de la duda","Mt 14,31","Pedro dudó y empezó a hundirse, pero Jesús le tendió la mano enseguida. Tú también puedes dudar y ser amado(a). Un poquito de fe basta para empezar a caminar sobre las aguas.","Jesús, creo, pero ayuda mi poca fe. Cuando no entienda, enséñame a confiar. Cuando no sienta, recuérdame que estás aquí. Aumenta mi fe, Señor. Amén.","Reza un Ave María muy despacio, saboreando cada palabra, y repítela una segunda vez por alguien que duda."],
+ ["El nudo del resentimiento","Ef 4,32","Guardar rencor es cargar un costal de piedras que nadie ve. Yo sé cuánto te dolieron esas palabras. Suéltalas hoy: no para justificar a quien te hirió, sino para recobrar tu paz.","Señor, libérame del peso del rencor. No puedo perdonar con mis fuerzas, pero quiero hacerlo con las tuyas. Sana mi herida y bendice a quien me hizo daño. Amén.","Reza un Padrenuestro por la persona que te hirió, aunque hoy lo hagas sin sentir nada."],
+ ["El nudo de la culpa","1 Jn 1,9","Lo que Dios ya perdonó, deja de recordártelo a ti mismo(a). Mi Hijo no vino por los perfectos, sino por quienes necesitan un abrazo del Padre. Vuelve a casa; la puerta está abierta.","Padre misericordioso, me acojo a tu perdón. Lávame de lo que hice y de lo que dejé de hacer. Hazme nuevo(a) esta Navidad y enséñame a empezar de nuevo. Amén.","Agenda tu confesión antes de Navidad, o dedica diez minutos a examinar tu corazón con sinceridad."],
+ ["El nudo de la soledad","Sal 68,6","Nunca estás solo(a). Aunque no me veas, mi manto te cubre y mi mirada no se aparta de ti. Cuando el silencio de la casa pese, acércate: aquí siempre hay lugar para ti.","María, madre mía, acompáñame cuando me sienta solo(a). Envía a mi vida personas que me quieran bien y enséñame a ser compañía para otros. Amén.","Escribe o llama hoy a alguien que esté pasando solo(a) estas fechas y dile que piensas en él o ella."],
+ ["El nudo de la ansiedad","Flp 4,6-7","Respira, hijo mío. No tienes que resolver todo esta noche; el mañana también le pertenece a Dios. Deja que tu mente descanse en brazos de quien nunca se cansa de cuidarte.","Señor, calma mi mente y aquieta mi corazón. Te entrego mis preocupaciones una por una, porque tú cuidas de mí mejor que yo mismo(a). Amén.","Respira hondo tres veces, repitiendo en cada exhalación: «Jesús, en ti confío»."],
+ ["El nudo del orgullo","Sant 4,6","Mi Hijo nació pequeño, en un pesebre, sin ruido ni títulos. La humildad no te quita dignidad: te abre puertas que el orgullo mantiene cerradas. Da tú el primer paso.","Jesús, manso y humilde de corazón, enséñame a reconocer mis errores y a pedir perdón primero. Quita de mí la dureza y dame un corazón sencillo. Amén.","Pide una disculpa sincera a alguien con quien llevas días o años distanciado(a)."],
+ ["El nudo del desánimo","Gál 6,9","Sé que estás cansado(a) y que a veces parece que nada cambia. Pero lo que siembras con fe y con amor florece a su tiempo, aunque no lo veas hoy. No sueltes mi mano.","Señor, renueva mis fuerzas cuando me sienta sin ganas. No permitas que me rinda justo antes de ver tu obra. Dame un motivo para levantarme hoy. Amén.","Haz hoy una tarea pequeña que has postergado y ofrécela a Dios como acto de esperanza."],
+ ["El nudo de la familia","Jos 24,15","Yo sé cuánto duele una casa dividida, y también cuánto vale cada abrazo que se logra. Pon a tu familia en mis manos: yo la presento al Niño Jesús con todo mi cariño.","Virgen María, reina de mi hogar, une a mi familia en el amor. Cura las heridas entre nosotros y haz de nuestra casa un pequeño Nazaret. Amén.","Bendice a tu familia con una oración en voz alta, aunque estén lejos, nombrando a cada uno."],
+ ["El nudo del perdón","Col 3,13","Perdonar no es olvidar ni justificar: es permitir que Dios cure lo que tú solo(a) no puedes. Cuando perdonas, no liberas solo a otro; te liberas a ti. Empieza aunque tiemble tu corazón.","Dios mío, dame la gracia de perdonar de corazón, como tú me perdonas cada día. Si todavía no puedo, concédeme al menos el deseo de querer hacerlo. Amén.","Escribe el nombre de quien deseas perdonar y reza por esa persona un Padrenuestro completo."],
+ ["El nudo de la enfermedad","Sal 147,3","Estoy junto a cada cama de dolor, junto a cada familia que espera noticias. Dios sana de muchas maneras, y ninguna lágrima suya se pierde. No lo enfrentes solo(a): yo estoy aquí.","Señor, tú que sanaste a los enfermos, dame paz en la enfermedad y fortaleza para seguir. Cuida a quienes sufren en su cuerpo o en su alma. Amén.","Ofrece tu día por una persona enferma que conozcas y llámala o envíale un mensaje."],
+ ["El nudo de la provisión","Flp 4,19","El que alimentó a su pueblo en el desierto no te dejará sin pan. Yo misma vi a mi Hijo nacer sin cuna prestada, y nada le faltó de lo esencial. Confía: Dios provee.","Padre, tú conoces mis necesidades antes de que las diga. Confío en tu providencia y te pido sabiduría para administrar lo que tengo y generosidad para compartirlo. Amén.","Comparte hoy un poco de comida, ropa o dinero con alguien que lo necesite más que tú."],
+ ["El nudo del trabajo","Col 3,23","Nazaret fue un taller, y mi Hijo trabajó con sus manos junto a José. Tu esfuerzo, hecho con amor, es una oración. No importa cuán pequeña parezca tu tarea: Dios la ve y la bendice.","San José, patrono de los trabajadores, intercede por mi trabajo y por mis compañeros. Que cada tarea que haga sea ofrenda de amor y servicio. Amén.","Haz tu trabajo de hoy como ofrenda, y agradece a un compañero por algo concreto."],
+ ["El nudo de la envidia","Prov 14,30","Lo que Dios tiene para ti no se parece a lo de nadie más. Comparar roba la alegría. Alégrate con los demás y verás cómo tu corazón se vuelve más ligero y agradecido.","Señor, sana mi corazón de la comparación. Quiero bendecir en lugar de envidiar y reconocer los dones que me has dado. Gracias por mi propio camino. Amén.","Felicita hoy, con sinceridad, a alguien cuyo éxito o alegría te cueste celebrar."],
+ ["El nudo del duelo","Mt 5,4","Yo también estuve al pie de la cruz y sé lo que es perder a quien se ama. Tu lágrima es sagrada; no la escondas. Quienes se fueron descansan en Dios y esperan abrazarte de nuevo.","Dios de consuelo, abraza a mis seres queridos que ya están contigo y consuela mi corazón en esta ausencia. Dame paz y esperanza de volvernos a encontrar. Amén.","Enciende una vela por tus difuntos y menciona sus nombres en voz alta."],
+ ["El nudo de la ingratitud","Sal 136,1","Cuando cuentas tus bendiciones, los nudos se aflojan solos. Quizá no tengas todo lo que deseas, pero tienes mucho más de lo que ves. Mira con ojos de agradecimiento.","Gracias, Señor, por la vida, por mi familia, por el pan de cada día y por todo lo que a veces olvido agradecer. Que mi corazón sea siempre agradecido. Amén.","Escribe cinco cosas concretas por las que agradeces hoy y léelas en voz alta."],
+ ["El nudo de los vicios","Rom 6,14","No eres tu caída. Cada vez que te levantas, el cielo celebra. Mi Hijo no se cansa de tender la mano a quienes luchan, aunque hayan fallado mil veces. Hoy puedes empezar de nuevo.","Jesús, rompe las cadenas que no puedo romper solo(a). Dame fuerza en la tentación y no permitas que me desanime cuando caiga. Contigo puedo ser libre. Amén.","Elige una renuncia concreta para hoy y ofrécela a Dios por tu libertad interior."],
+ ["El nudo de la impaciencia","Sant 5,8","El Niño tardó nueve meses en nacer, y yo lo esperé en silencio. Lo bueno de Dios madura despacio. Tu tiempo no es el de él, pero su tiempo siempre es perfecto.","Señor, dame paciencia con los demás y conmigo. Enséñame a esperar tus tiempos sin quejarme y a confiar en que tu respuesta llegará en el momento justo. Amén.","Espera hoy sin quejarte —en una fila, en el tráfico o en una llamada— y ofrécelo en oración."],
+ ["El nudo de la desesperanza","Rom 15,13","Cuando todo parece imposible, ahí empiezo yo a obrar. Mira hacia la estrella: sigue brillando aunque la noche sea larga. La esperanza no es tener todas las respuestas, es no soltar la mano de Dios.","Dios de la esperanza, llena mi corazón de gozo y de paz en el creer. Que ninguna noche me haga olvidar que tu luz viene en camino. Amén.","Reza un misterio gozoso del Rosario y pide la gracia de volver a esperar."],
+ ["El nudo del pasado","Is 43,18-19","Dios hace algo nuevo, ¿no lo notas? No vivas atado(a) a lo que ya no existe ni a lo que no pudo ser. Lo que quedó atrás me lo puedes entregar; yo lo guardo con ternura.","Señor, sana mis recuerdos y las heridas que aún duelen. Ayúdame a soltar el pasado y a abrirme al camino nuevo que me preparas. Amén.","Escribe una carta a tu pasado, dale gracias por lo aprendido y quémala con cuidado."],
+ ["El nudo de la paz del hogar","Jn 14,27","Mi Hijo prometió una paz que el mundo no puede dar. Déjala entrar en tu casa. Una palabra amable, un silencio a tiempo, un abrazo sincero: así se desatan las tensiones del hogar.","Jesús, reina en mi hogar. Que no falten la paz, el respeto ni el amor. Haz de mi casa un lugar donde todos se sientan en casa y cerca de ti. Amén.","Reza con tu familia antes de dormir y bendice las puertas y las habitaciones de tu casa."],
+ ["El nudo de la confianza","Prov 3,5","Confiar es entregar el timón. Yo viajo contigo en la barca, aun cuando el mar se agita. No te pido que entiendas todo, solo que te dejes guiar por quien te ama de verdad.","Señor, no me apoyo en mi propia fuerza ni en mis planes. Me entrego a ti con todo lo que soy y todo lo que tengo. Confío en tu amor. Amén.","Di en voz alta tres veces: «Dios, tú puedes más que yo», y entrega una preocupación concreta."],
+ ["El nudo de la entrega","Lc 2,11","Esta es la noche en que Dios se hizo niño. Todo tu ser puede descansar en él. Mañana lo recibirás en el pesebre y en el altar. Hoy, deja a sus pies cada nudo que aún queda.","Niño Jesús, nace en mi corazón. Te entrego mis nudos, mis miedos y mi vida entera. Quédate conmigo esta Navidad y siempre. Amén.","Coloca al Niño en el pesebre y reza en familia el Gloria o un villancico de agradecimiento."]
+];
+
+const KEY = "adviento-desatanudos-v1";
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+function save(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
+let state = load(); state.done = state.done || {}; state.gest = state.gest || {}; state.notes = state.notes || {};
+
+const now = new Date();
+const inDecember = now.getMonth() === 11;
+const today = inDecember ? now.getDate() : null;
+function isOpen(d){ return !inDecember || d <= today; }
+
+document.getElementById("mode").textContent = inDecember
+  ? (today <= 24 ? "Hoy es " + today + " de diciembre: tu nudo del día brilla en la cinta." : "El Adviento ya llegó a Nochebuena. Puedes volver a cualquier nudo.")
+  : "Fuera de diciembre puedes abrir los nudos a tu ritmo. En diciembre se abrirán uno por día.";
+
+/* ---------- starry sky ---------- */
+const sky = document.getElementById("sky"), sx = sky.getContext("2d");
+function drawSky(){
+  const dpr = window.devicePixelRatio||1; sky.width = innerWidth*dpr; sky.height = innerHeight*dpr; sx.scale(dpr,dpr);
+  let seed = 7; const r = () => (seed = (seed*9301+49297)%233280)/233280;
+  for(let i=0;i<Math.round(innerWidth*innerHeight/4200);i++){
+    sx.fillStyle = `rgba(255,245,220,${.15+r()*.45})`; sx.beginPath(); sx.arc(r()*innerWidth, r()*innerHeight, .4+r()*1.1, 0, 6.3); sx.fill();
+  }
+}
+drawSky(); addEventListener("resize", ()=>{ drawSky(); layout(); });
+
+/* ---------- knots ---------- */
+const knotsEl = document.getElementById("knots"), pathSvg = document.getElementById("pathSvg");
+function knotSVG(state){
+  if(state === "done") return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="27" fill="#e2c27a" stroke="#c9a55a" stroke-width="2"/><path d="M32 12 L35.5 28.5 L52 32 L35.5 35.5 L32 52 L28.5 35.5 L12 32 L28.5 28.5Z" fill="#fbf7ee" opacity=".55"/></svg>`;
+  const locked = state === "locked";
+  const fill = locked ? "rgba(244,236,216,.08)" : "#f6eedb", stroke = locked ? "rgba(201,165,90,.45)" : "#c9a55a";
+  return `<svg viewBox="0 0 64 64">
+    ${state==="today" ? '<circle class="halo" cx="32" cy="32" r="31" fill="none" stroke="#e2c27a" stroke-width="2"/>' : ''}
+    <circle cx="32" cy="32" r="25" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
+    <path class="loop" d="M14 38 C22 52, 42 52, 50 38" fill="none" stroke="${stroke}" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="60" stroke-dashoffset="0"/>
+  </svg>`;
+}
+function knotState(d){
+  if(state.done[d]) return "done";
+  if(!isOpen(d)) return "locked";
+  if(inDecember && d === today) return "today";
+  return "open";
+}
+function render(){
+  knotsEl.innerHTML = "";
+  for(let d=1; d<=24; d++){
+    const st = knotState(d), b = document.createElement("button");
+    b.className = "knot " + st; b.dataset.day = d;
+    b.setAttribute("aria-label", `Día ${d}: ${DAYS[d-1][0]}${st==="done"?", desatado":st==="locked"?", se abre el "+d+" de diciembre":""}`);
+    b.innerHTML = knotSVG(st) + `<span class="num">${d}</span><span class="date">${d} dic</span>`;
+    b.addEventListener("click", () => openDay(d));
+    knotsEl.appendChild(b);
+  }
+  const n = Object.keys(state.done).length;
+  document.getElementById("count").textContent = `${n} de 24 nudos desatados`;
+  document.getElementById("bar").style.width = (n/24*100) + "%";
+  layout();
+}
+function layout(){
+  const w = knotsEl.clientWidth, cols = w < 420 ? 4 : w < 640 ? 5 : 6, gap = 54;
+  knotsEl.style.setProperty("--cols", cols); knotsEl.style.setProperty("--rowgap", gap+"px");
+  // reorder visually: serpentine
+  const items = [...knotsEl.children];
+  items.forEach((el,i)=>{ const row=Math.floor(i/cols), col=i%cols; el.style.gridRow=row+1; el.style.gridColumn=(row%2? cols-col : col+1); });
+  requestAnimationFrame(()=>{
+    const box = knotsEl.getBoundingClientRect(), pts = items.map(el=>{ const r=el.getBoundingClientRect(); return [r.left-box.left+r.width/2, r.top-box.top+r.height/2]; });
+    let dpath = `M ${pts[0][0]} ${pts[0][1]}`;
+    for(let i=1;i<pts.length;i++){
+      const [x0,y0]=pts[i-1], [x1,y1]=pts[i];
+      if(y0===y1){ const mx=(x0+x1)/2; dpath += ` Q ${mx} ${y0 + (i%2?10:-10)} ${x1} ${y1}`; }
+      else { const bulge = (x0 > box.width/2) ? 46 : -46; dpath += ` C ${x0+bulge} ${y0}, ${x1+bulge} ${y1}, ${x1} ${y1}`; }
+    }
+    pathSvg.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
+    pathSvg.innerHTML = `<path d="${dpath}" fill="none" stroke="#c9a55a" stroke-width="9" stroke-linecap="round" opacity=".9"/><path d="${dpath}" fill="none" stroke="#f6eedb" stroke-width="5.5" stroke-linecap="round"/>`;
+  });
+}
+
+/* ---------- sheet ---------- */
+const veil = document.getElementById("veil"), sheet = document.getElementById("sheet");
+let lastFocus = null;
+const ORN = `<svg class="orn" width="150" height="14" viewBox="0 0 150 14" aria-hidden="true"><line x1="8" y1="7" x2="62" y2="7" stroke="#c9a55a"/><line x1="88" y1="7" x2="142" y2="7" stroke="#c9a55a"/><path d="M75 0 L77.2 4.6 L82 5.2 L78.5 8.4 L79.4 13.2 L75 10.8 L70.6 13.2 L71.5 8.4 L68 5.2 L72.8 4.6Z" fill="#c9a55a"/></svg>`;
+function esc(s){ return s.replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function show(html){ lastFocus=document.activeElement; sheet.innerHTML = `<button class="close" aria-label="Cerrar">×</button>` + html; veil.classList.add("open"); document.body.style.overflow="hidden"; sheet.querySelector(".close").addEventListener("click", hide); sheet.querySelector(".close").focus(); }
+function hide(){ veil.classList.remove("open"); document.body.style.overflow=""; if(lastFocus) lastFocus.focus(); }
+veil.addEventListener("click", e=>{ if(e.target===veil) hide(); });
+addEventListener("keydown", e=>{ if(e.key==="Escape" && veil.classList.contains("open")) hide(); });
+
+function openDay(d){
+  const [t, ref, msg, pr, ges] = DAYS[d-1];
+  if(!isOpen(d)){
+    show(`<p class="day">Día ${d} de Adviento</p><div class="lockmsg"><div class="big">Aún no, corazón</div><p>Este nudo se abre el <b>${d} de diciembre</b>. Mientras tanto, vive el de hoy con calma: la espera también es oración.</p></div>`);
+    return;
+  }
+  const done = !!state.done[d];
+  show(`
+    <p class="day">Día ${d} de Adviento</p>
+    <h2 id="sheetTitle">${t}</h2>
+    <p class="ref">Palabra de Dios: ${ref}</p>${ORN}
+    <div class="block msg"><h3>Mensaje de María</h3><p>${msg}</p></div>
+    <div class="block prayer"><h3>Oración</h3><p>${pr}</p></div>
+    <div class="block"><h3>Gesto del día</h3><p>${ges}</p>
+      <label class="check"><input type="checkbox" id="g" ${state.gest[d]?"checked":""}> Hice el gesto de hoy</label></div>
+    <div class="block"><h3>Lo que hoy entrego a María</h3>
+      <textarea id="note" placeholder="Escribe aquí tu nudo de hoy…">${esc(state.notes[d]||"")}</textarea></div>
+    <button class="untie" id="untie" ${done?"disabled":""}>${done ? "Nudo desatado" : "Desatar este nudo"}</button>
+  `);
+  sheet.querySelector("#g").addEventListener("change", e=>{ state.gest[d]=e.target.checked; save(state); });
+  sheet.querySelector("#note").addEventListener("input", e=>{ state.notes[d]=e.target.value; save(state); });
+  sheet.querySelector("#untie").addEventListener("click", ()=>{
+    state.done[d] = true; save(state);
+    const k = knotsEl.querySelector(`[data-day="${d}"]`); if(k) k.classList.add("untie");
+    hide(); setTimeout(()=>{ render(); if(Object.keys(state.done).length===24) setTimeout(finale, 400); }, 650);
+  });
+}
+function finale(){
+  show(`<p class="day">Nochebuena · 24 de diciembre</p><h2 id="sheetTitle">¡Feliz Navidad!</h2><p class="ref">Hoy se desató el último nudo</p>${ORN}
+  <div class="block msg"><h3>Mensaje de María</h3><p>Durante 24 días entregaste tus cargas, y yo las puse a los pies del Niño Jesús. Que esta Navidad te encuentre con el corazón ligero, la familia unida y la fe renovada.</p></div>
+  <div class="block prayer"><h3>Oración de Navidad</h3><p>Niño Jesús, gracias por nacer en nuestro corazón. Bendice a mi familia y a quienes sufren esta noche. Que tu paz habite en cada hogar. Y tú, María, sigue desatando los nudos de nuestra vida. Amén.</p></div>`);
+}
+document.getElementById("startPrayer").addEventListener("click", ()=>{
+  show(`<p class="day">Antes del primer nudo</p><h2 id="sheetTitle">Oración para comenzar</h2>${ORN}
+  <div class="block prayer"><p>Virgen María, tú que desatas los nudos de nuestra vida, acompáñanos en este camino hacia la Navidad. Cada día pondremos en tus manos un nudo, para que tú lo presentes a Jesús. Prepara nuestro corazón para recibirlo. Amén.</p></div>
+  <div class="block"><h3>Cómo vivirlo</h3><p>Abre un nudo cada día del 1 al 24 de diciembre. Léanlo en familia, enciendan una vela, recen la oración y cumplan el gesto. Cinco minutos bastan. Lo que escribas se guarda solo en este dispositivo.</p></div>`);
+});
+render();
+</script>
+</body>
+</html>
